@@ -1,0 +1,6 @@
+{
+  "name": "Explorer's Diary",
+  "landing_text": "Начало технологического пути.",
+  "book_texture": "eletech:textures/gui/guide_book_open_hand.png",
+  "use_resource_pack": true
+}
