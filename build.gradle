@@ -1,0 +1,78 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '1.0'
+group = 'net.vlayzi.eletech'
+
+base {
+    archivesName = 'eletech'
+}
+
+repositories {
+    maven { url "https://maven.blamejared.com/" } // Репозиторий для Patchouli
+    mavenCentral()
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                eletech { source sourceSets.main }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
+
+    implementation fg.deobf("vazkii.patchouli:Patchouli:1.20.1-84-FORGE")
+}
+
+// Правильная настройка ресурсов для Groovy
+tasks.named('processResources', ProcessResources).configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Мы убрали функцию expand, чтобы Gradle не лез внутрь mods.toml
+    inputs.property "version", project.version
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        // Оставляем пустым или просто не используем expand
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : "eletech",
+                'Specification-Vendor'    : "vlayzi",
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.version,
+                'Implementation-Vendor'   : "vlayzi",
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
