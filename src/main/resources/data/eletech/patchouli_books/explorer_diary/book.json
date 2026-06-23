@@ -1,0 +1,6 @@
+{
+  "name": "Книга Исследователя",
+  "landing_text": "Записки о первых шагах в изучении материи...",
+  "model": "eletech:explorer_diary",
+  "i18n": true
+}
